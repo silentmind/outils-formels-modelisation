@@ -23,8 +23,10 @@ extension PredicateNet {
             if let visitedMark = firstInit.first(where:{PredicateNet.equals($0.marking, newMarking.marking)}) {
               current.successors[tr]![bn] = visitedMark // If already Visited, is added to the successors.
             }
-            else if(!toVisit.contains(where: {PredicateNet.equals($0.marking, newMarking.marking)})) {
-              toVisit.append(newMarking) // If not visited, added to toVisit list.
+            else {
+              if(!toVisit.contains(where: {PredicateNet.equals($0.marking, newMarking.marking)})) {
+                toVisit.append(newMarking) // If not visited, added to toVisit list.
+              }
               current.successors[tr]![bn] = newMarking
             }
           }
