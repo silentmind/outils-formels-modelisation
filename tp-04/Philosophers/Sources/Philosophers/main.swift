@@ -4,23 +4,23 @@ import PhilosophersLib
 do {
     let philosophers = lockFreePhilosophers(n: 5)
     let philosophersMarking = philosophers.markingGraph(from : philosophers.initialMarking!)
-    print("For the unlockable Philosophers model with 5 philosophers, there are \(philosophersMarking!.count) possible markings.\n")
+    print("For the unlockable Philosophers model with 5 philosophers, there are \(philosophersMarking!.count) possible markings.")
 }
 
 do {
   let philosophers = lockablePhilosophers(n: 5)
   let philosophersMarking = philosophers.markingGraph(from : philosophers.initialMarking!)
-  print("For the lockable Philosophers model with 5 philosophers, there are \(philosophersMarking!.count) possible markings.\n")
+  print("For the lockable Philosophers model with 5 philosophers, there are \(philosophersMarking!.count) possible markings.")
 
-  lock : for node in philosophersMarking! {
+  lock : for markNode in philosophersMarking! {
     var isFound = true
-    for (_, e) in node.successors {
+    for (_, e) in markNode.successors {
       if e.count != 0 {
         isFound = false
       }
     }
     if isFound {
-      print("There's a locked case with the marking \(node.marking).")
+      print("There's a locked case with the marking \(markNode.marking).")
       break lock
     }
   }
