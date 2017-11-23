@@ -2,22 +2,38 @@ extension PredicateNet {
 
     /// Returns the marking graph of a bounded predicate net.
     public func markingGraph(from marking: MarkingType) -> PredicateMarkingNode<T>? {
-        // Write your code here ...
+      // How to use: only type "swift test" in Terminal
+      // The last 3 "Executed" answer tp-04 questions
 
-        // Note that I created the two static methods `equals(_:_:)` and `greater(_:_:)` to help
-        // you compare predicate markings. You can use them as the following:
-        //
-        //     PredicateNet.equals(someMarking, someOtherMarking)
-        //     PredicateNet.greater(someMarking, someOtherMarking)
-        //
-        // You may use these methods to check if you've already visited a marking, or if the model
-        // is unbounded.
-
-        return nil
+      // Initialization
+      let firstInit = PredicateMarkingNode<T>(marking: marking)
+      var toVisit: [PredicateMarkingNode<T>] = [firstInit]
+      while(!toVisit.isEmpty) {
+        let current = toVisit.popLast()! // Wile there's nodes to visit, get the last/current one.
+        for tr in transitions {
+          current.successors[tr] = [:] // Successors' initialisation.
+          let binding: [PredicateTransition<T>.Binding] = tr.fireableBingings(from: current.marking)
+          for bn in binding { // For every binding...
+            let newMarking = PredicateMarkingNode(marking: tr.fire(from: current.marking, with:bn)!)
+            for finit in firstInit {
+              if (PredicateNet.greater(newMarking.marking, finit.marking)) {
+                return nil // Returns nil in case of infinite loop.
+              }
+            }
+            if let visitedMark = firstInit.first(where:{PredicateNet.equals($0.marking, newMarking.marking)}) {
+              current.successors[tr]![bn] = visitedMark // If already Visited, is added to the successors.
+            }
+            else if(!toVisit.contains(where: {PredicateNet.equals($0.marking, newMarking.marking)})) {
+              toVisit.append(newMarking) // If not visited, added to toVisit list.
+              current.successors[tr]![bn] = newMarking
+            }
+          }
+        }
+      }
+      return firstInit
     }
 
     // MARK: Internals
-
     private static func equals(_ lhs: MarkingType, _ rhs: MarkingType) -> Bool {
         guard lhs.keys == rhs.keys else { return false }
         for (place, tokens) in lhs {
@@ -37,10 +53,10 @@ extension PredicateNet {
 
         var hasGreater = false
         for (place, tokens) in lhs {
-            guard tokens.count >= rhs[place]!.count else { return false }
+            guard tokens.count >= rhs[place]!.count else {return false}
             hasGreater = hasGreater || (tokens.count > rhs[place]!.count)
             for t in rhs[place]! {
-                guard tokens.filter({ $0 == t }).count >= rhs[place]!.filter({ $0 == t }).count
+                guard tokens.filter({$0 == t}).count >= rhs[place]!.filter({$0 == t}).count
                     else {
                         return false
                 }
@@ -74,7 +90,7 @@ public class PredicateMarkingNode<T: Equatable>: Sequence {
             var unvisited: [PredicateMarkingNode] = []
             for (_, successorsByBinding) in currentNode.successors {
                 for (_, successor) in successorsByBinding {
-                    if !visited.contains(where: { $0 === successor }) {
+                    if !visited.contains(where: {$0 === successor}) {
                         unvisited.append(successor)
                     }
                 }
@@ -99,7 +115,6 @@ public class PredicateMarkingNode<T: Equatable>: Sequence {
 
     /// The successors of this node.
     public var successors: [PredicateTransition<T>: PredicateBindingMap<T>]
-
 }
 
 /// The type of the mapping `(Binding) ->  PredicateMarkingNode`.
@@ -131,11 +146,11 @@ public struct PredicateBindingMap<T: Equatable>: Collection {
 
     public subscript(key: Key) -> Value? {
         get {
-            return self.storage.first(where: { $0.0 == key })?.value
+            return self.storage.first(where: {$0.0 == key})?.value
         }
 
         set {
-            let index = self.storage.index(where: { $0.0 == key })
+            let index = self.storage.index(where: {$0.0 == key})
             if let value = newValue {
                 if index != nil {
                     self.storage[index!] = (key, value)
