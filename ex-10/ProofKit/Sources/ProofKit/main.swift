@@ -2,7 +2,19 @@ import ProofKitLib
 
 let a: Formula = "a"
 let b: Formula = "b"
+let c: Formula = "c"
+let d: Formula = "d"
+
+let j = a || b |- (a && c) || (b && c) || !c
+let k = 
+
+print(j.isProvable)
+
+
+
+/*
 let f = a && b
+
 
 print(f)
 
@@ -50,3 +62,5 @@ let fruityEvaluation = f.eval { (proposition) -> Fruit in
     }
 }
 print(fruityEvaluation)
+
+*/
