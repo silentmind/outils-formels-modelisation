@@ -72,14 +72,56 @@ public enum Formula {
 
     /// The disjunctive normal form of the formula.
     public var dnf: Formula {
-        // Write your code here ...
-        return self
+      switch self.nnf { // Change formula to NFF
+        case .proposition(_):
+            return self.nnf
+        case .negation(_):
+            return self.nnf
+
+        case .disjunction(let a, let b): // In case of disjunction, return dnf of both dnf values
+            return a.dnf || b.dnf
+
+        case .conjunction(let a, let b): // In case of conjunction (shows if it's possible to distibute)
+            switch a.dnf { // First value
+              case .disjunction(let c, let d):
+                  return (b && d).dnf || (b && c).dnf
+              default: break
+            }
+            switch b.dnf { // Second value
+              case .disjunction(let c, let d):
+                  return (c && a).dnf || (d && a).dnf
+              default: break
+            }
+            default: break
+      }
+      return self.nnf
     }
 
     /// The conjunctive normal form of the formula.
     public var cnf: Formula {
-        // Write your code here ...
-        return self
+      switch self.nnf { // Change formula to NFF
+        case .proposition(_):
+            return self.nnf
+        case .negation(_):
+            return self.nnf
+
+        case .conjunction(let a, let b): // In case of conjunction, return cnf of both dnf values
+            return a.cnf && b.cnf
+
+      case .disjunction(let a, let b): // In case of disjunction (shows if it's possible to distibute)
+            switch a.cnf { // First value
+              case .conjunction(let c, let d):
+                  return (b || c).cnf && (b || d).cnf
+              default: break
+            }
+            switch b.cnf { // Second value
+              case .conjunction(let c, let d):
+                  return (a || c).cnf && (a||d).cnf
+              default: break
+            }
+            default: break
+      }
+       return self.nnf
     }
 
     /// The propositions the formula is based on.
